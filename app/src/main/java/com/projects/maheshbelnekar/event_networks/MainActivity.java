@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                UserMenuSelector(menuItem);
+                userMenuSelector(menuItem);
                 return false;
             }
         });
@@ -63,16 +63,17 @@ public class MainActivity extends AppCompatActivity {
         if(currentUser == null)
         {
             // No user present, ask user to login
-            SendUserToLoginActivity();
+            sendUserToLoginActivity();
         }
     }
 
-    private Boolean SendUserToLoginActivity() {
+    private Boolean sendUserToLoginActivity() {
         Intent loginIntent = new Intent(MainActivity.this,LoginActivity.class);
 
         // Clear the current task and start a new task
         loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(loginIntent);
+        finish();
         return true;
     }
 
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void UserMenuSelector(MenuItem item){
+    private void userMenuSelector(MenuItem item){
         switch (item.getItemId()){
 
             case R.id.nav_profile:
