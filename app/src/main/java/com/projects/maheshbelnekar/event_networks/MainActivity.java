@@ -1,20 +1,25 @@
 package com.projects.maheshbelnekar.event_networks;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
-import android.support.v7.widget.Toolbar;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,7 +28,9 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private RecyclerView postList;
     private Toolbar mToolbar;
+
     private FirebaseAuth mAuth;
+    private DatabaseReference usersRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mAuth = FirebaseAuth.getInstance();
+        usersRef = FirebaseDatabase.getInstance().getReference().child("Users");
+
         mToolbar = (Toolbar)findViewById(R.id.main_page_toolbar);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("Home");
@@ -65,6 +74,43 @@ public class MainActivity extends AppCompatActivity {
             // No user present, ask user to login
             sendUserToLoginActivity();
         }
+        else{
+            checkUserExistence();
+        }
+            
+    }
+
+    private Boolean checkUserExistence() {
+        final String currentUserId  = mAuth.getCurrentUser().getUid();
+
+        usersRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                // check if user is present
+                if(!dataSnapshot.hasChild(currentUserId)){
+                    //user isn't present in our database
+                    sendUserToSetUpActivity();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        return true;
+    }
+
+    private Boolean sendUserToSetUpActivity() {
+        Intent setUpIntent = new Intent(MainActivity.this,SetupActivity.class);
+
+        // Clear the current task and start a new task
+        setUpIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(setUpIntent);
+        finish();
+
+        return true;
     }
 
     private Boolean sendUserToLoginActivity() {
