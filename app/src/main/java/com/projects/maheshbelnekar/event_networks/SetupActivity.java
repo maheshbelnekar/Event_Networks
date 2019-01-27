@@ -1,51 +1,145 @@
 package com.projects.maheshbelnekar.event_networks;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
+
+import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class SetupActivity extends AppCompatActivity {
 
-    private EditText userName, fullName, profession;
+    private EditText UserName, FullName, Profession;
     private DatePicker dob;
     private CircleImageView profileImage;
     private Button saveInformationButton;
+    private ProgressDialog loadingBar;
 
     private FirebaseAuth mAuth;
+    private DatabaseReference usersRef;
+
+    String currentUserId;
+    final static int GALLERY_PICK = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         mAuth = FirebaseAuth.getInstance();
+        currentUserId = mAuth.getCurrentUser().getUid();
+        usersRef = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUserId);
+
         setContentView(R.layout.activity_setup);
-        userName = (EditText)findViewById(R.id.setup_username);
-        fullName = (EditText)findViewById(R.id.setup_fullname);
-        profession = (EditText)findViewById(R.id.setup_fullname);
+        UserName = (EditText)findViewById(R.id.setup_username);
+        FullName = (EditText)findViewById(R.id.setup_fullname);
+        Profession = (EditText)findViewById(R.id.setup_profession);
         saveInformationButton = (Button)findViewById(R.id.setup_save_information_button);
         profileImage = (CircleImageView)findViewById(R.id.setup_profile_image);
 
+        loadingBar = new ProgressDialog(this);
+
+        saveInformationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveAccountSetUpInformation();
+            }
+        });
+
+        profileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent galleryIntent = new Intent();
+                galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+                galleryIntent.setType("image/*");
+                startActivityForResult(galleryIntent,GALLERY_PICK);
+            }
+        });
+
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
 
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null)
-        {
-            // If the user is aready logged in, send him to main activity
-            sendUserToMainActivity();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if ( requestCode == GALLERY_PICK && resultCode == RESULT_OK && data != null ){
+            Uri imageUri = data.getData();
+
+            CropImage.activity().setGuidelines(CropImageView.Guidelines.ON)
+                    .setAspectRatio(1,1).start(this);
+        }
+
+        if (requestCode==CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE){
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+
+            if (resultCode == RESULT_OK){
+                Uri resultUri = result.getUri();
+            }
         }
     }
 
+    private Boolean saveAccountSetUpInformation() {
+        String username = UserName.getText().toString();
+        String fullname = FullName.getText().toString();
+        String profession = Profession.getText().toString();
+
+        if(username.isEmpty()){
+            Toast.makeText(this,"Please Enter Username",Toast.LENGTH_SHORT).show();
+        }
+        else if(fullname.isEmpty()){
+            Toast.makeText(this,"Please Enter Full Name",Toast.LENGTH_SHORT).show();
+        }
+        else if(profession.isEmpty()){
+            Toast.makeText(this,"Please Enter Profession",Toast.LENGTH_SHORT).show();
+        }
+        else {
+            loadingBar.setTitle("Creating new account");
+            loadingBar.setMessage("Please wait, while we are creating your new account");
+            loadingBar.show();
+            loadingBar.setCanceledOnTouchOutside(true);
+
+            // Save data to realtime database
+            HashMap userMap = new HashMap();
+            userMap.put("username",username);
+            userMap.put("fullname",fullname);
+            userMap.put("profession",profession);
+            usersRef.updateChildren(userMap).addOnCompleteListener(new OnCompleteListener() {
+                @Override
+                public void onComplete(@NonNull Task task) {
+                    loadingBar.dismiss();
+                    if(task.isSuccessful()){
+                        sendUserToMainActivity();
+                        Toast.makeText(SetupActivity.this,"your account is created successfully",Toast.LENGTH_SHORT).show();
+                    }
+                    else{
+                        String errMsg = task.getException().getMessage();
+                        Toast.makeText(SetupActivity.this,errMsg,Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
+
+
+        return true;
+    }
 
     private Boolean sendUserToMainActivity() {
         Intent mainIntent = new Intent(SetupActivity.this, MainActivity.class);

@@ -14,6 +14,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -42,6 +43,18 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser != null)
+        {
+            // If the user is already logged in, send him to main activity
+            sendUserToMainActivity();
+        }
+    }
+
     private Boolean createNewAccount() {
         // first get the values from the screen
         String email = userEmail.getText().toString();
@@ -62,8 +75,8 @@ public class RegisterActivity extends AppCompatActivity {
         }
         else{
 
-            loadingBar.setTitle("Creating new account");
-            loadingBar.setMessage("Please wait, while we are creating your new account");
+            loadingBar.setTitle("Saving Details");
+            loadingBar.setMessage("Please wait, while we save your information");
             loadingBar.show();
             loadingBar.setCanceledOnTouchOutside(true);
 
@@ -93,6 +106,13 @@ public class RegisterActivity extends AppCompatActivity {
         setupIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(setupIntent);
         finish();
+        return true;
+    }
+
+    private Boolean sendUserToMainActivity() {
+        Intent mainIntent = new Intent(RegisterActivity.this, MainActivity.class);
+        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(mainIntent);
         return true;
     }
 }
