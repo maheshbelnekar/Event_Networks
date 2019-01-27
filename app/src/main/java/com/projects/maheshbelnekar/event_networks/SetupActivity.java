@@ -7,20 +7,31 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.File;
 import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -35,6 +46,7 @@ public class SetupActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private DatabaseReference usersRef;
+    private StorageReference userProfileImageRef;
 
     String currentUserId;
     final static int GALLERY_PICK = 1;
@@ -46,6 +58,7 @@ public class SetupActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         currentUserId = mAuth.getCurrentUser().getUid();
         usersRef = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUserId);
+        userProfileImageRef = FirebaseStorage.getInstance().getReference().child("Profile_Images");
 
         setContentView(R.layout.activity_setup);
         UserName = (EditText)findViewById(R.id.setup_username);
@@ -66,10 +79,47 @@ public class SetupActivity extends AppCompatActivity {
         profileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Select a picture from the gallery
                 Intent galleryIntent = new Intent();
                 galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
                 galleryIntent.setType("image/*");
                 startActivityForResult(galleryIntent,GALLERY_PICK);
+            }
+        });
+
+        usersRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()){
+                    String profileImagePath = dataSnapshot.child("profileImage").getValue().toString();
+
+                    StorageReference localProfile = userProfileImageRef.child(currentUserId+".jpg");
+
+                    try{
+
+                        final File localFile = File.createTempFile("profile_image_", ".jpg");
+
+                        localProfile.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+//                                localFile.getAbsolutePath();
+//                                localFile.
+//                                profileImage.setImage;
+//                                Log.i("Mahesh","Absolute: "+localFile.getAbsolutePath()+
+//                                        " Path: "+localFile.getPath());
+
+                            }
+                        });
+
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
             }
         });
 
@@ -83,15 +133,61 @@ public class SetupActivity extends AppCompatActivity {
         if ( requestCode == GALLERY_PICK && resultCode == RESULT_OK && data != null ){
             Uri imageUri = data.getData();
 
+            // send to crop image
             CropImage.activity().setGuidelines(CropImageView.Guidelines.ON)
                     .setAspectRatio(1,1).start(this);
         }
 
+        // Check if this request result is from crop image activity
         if (requestCode==CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE){
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
 
             if (resultCode == RESULT_OK){
-                Uri resultUri = result.getUri();
+                // Get the uri of the new cropped image
+                final Uri resultUri = result.getUri();
+
+                // Store(upload) this image on our realtime database with user id as the key
+                final StorageReference filePath = userProfileImageRef.child(currentUserId + ".jpg");
+
+                filePath.putFile(resultUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                    @Override
+                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                        if (!task.isSuccessful()) {
+                            throw task.getException();
+                        }
+
+                        // Continue with the task to get the download URL
+                        return filePath.getDownloadUrl();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        Toast.makeText(SetupActivity.this, "profile image stored", Toast.LENGTH_SHORT).show();
+
+                        //final String downloadUrl = task.getResult().getMetadata().getReference().getDownloadUrl();
+                        final String downloadUrl = task.getResult().toString();
+                        Log.i("Mahesh", "Download URL ," + downloadUrl);
+                        usersRef.child("profileImage").setValue(downloadUrl).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(SetupActivity.this, "Profile iamge saved to databse"
+                                            , Toast.LENGTH_SHORT).show();
+
+                                    Intent selfIntent = new Intent(SetupActivity.this, SetupActivity.class);
+                                    startActivity(selfIntent);
+
+                                } else {
+                                    Toast.makeText(SetupActivity.this, "Error Occured: " + task.getException().getMessage()
+                                            , Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
+                    });
+            }
+            else {
+                Toast.makeText(SetupActivity.this,"Error in cropping image",Toast.LENGTH_SHORT).show();
             }
         }
     }

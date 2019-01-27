@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 // check if user is present
-                if(!dataSnapshot.hasChild(currentUserId)){
+                if(!dataSnapshot.hasChild(currentUserId) || true){
                     //user isn't present in our database
                     sendUserToSetUpActivity();
                 }
