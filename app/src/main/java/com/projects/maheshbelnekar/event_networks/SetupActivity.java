@@ -91,7 +91,6 @@ public class SetupActivity extends AppCompatActivity {
                 if (dataSnapshot.exists()){
                     String profileImagePath = dataSnapshot.child("profileImage").getValue().toString();
                     Picasso.get().load(profileImagePath).placeholder(R.drawable.profile).into(profileImage);
-
                 }
             }
 
