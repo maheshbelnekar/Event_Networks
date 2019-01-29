@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -24,14 +23,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
-import java.io.File;
 import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -93,27 +90,6 @@ public class SetupActivity extends AppCompatActivity {
                 if (dataSnapshot.exists()){
                     String profileImagePath = dataSnapshot.child("profileImage").getValue().toString();
 
-                    StorageReference localProfile = userProfileImageRef.child(currentUserId+".jpg");
-
-                    try{
-
-                        final File localFile = File.createTempFile("profile_image_", ".jpg");
-
-                        localProfile.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-//                                localFile.getAbsolutePath();
-//                                localFile.
-//                                profileImage.setImage;
-//                                Log.i("Mahesh","Absolute: "+localFile.getAbsolutePath()+
-//                                        " Path: "+localFile.getPath());
-
-                            }
-                        });
-
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
                 }
             }
 
