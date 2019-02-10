@@ -75,7 +75,8 @@ public class MainActivity extends AppCompatActivity {
                         String fullName = dataSnapshot.child("fullname").getValue().toString();// Set Text
                         navProfileUserName.setText(fullName);
                     }
-                    else if (dataSnapshot.hasChild("profileImage")){
+
+                    if (dataSnapshot.hasChild("profileImage")){
                         // Get the image and udate using picasso library
                         String profilePath = dataSnapshot.child("profileImage").getValue().toString();
                         //Set Image
