@@ -69,15 +69,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){
-                    // Get the name and the image and uodate using picasso library
-                    String fullName = dataSnapshot.child("fullname").getValue().toString();
-                    String profilePath = dataSnapshot.child("profileImage").getValue().toString();
 
-                    // Set Text
-                    navProfileUserName.setText(fullName);
-                    //Set Image
-                    Picasso.get().load(profilePath).placeholder(R.drawable.profile).into(navProfileImage);
+                    if (dataSnapshot.hasChild("fullname")){
+                        // Get the name and update using picasso library
+                        String fullName = dataSnapshot.child("fullname").getValue().toString();// Set Text
+                        navProfileUserName.setText(fullName);
+                    }
 
+                    if (dataSnapshot.hasChild("profileImage")){
+                        // Get the image and udate using picasso library
+                        String profilePath = dataSnapshot.child("profileImage").getValue().toString();
+                        //Set Image
+                        Picasso.get().load(profilePath).placeholder(R.drawable.profile).into(navProfileImage);
+                    }
                 }
             }
 
