@@ -70,13 +70,12 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()){
 
-                    if (dataSnapshot.hasChild("fullname")){
+                    if (dataSnapshot.hasChild("fullname")) {
                         // Get the name and update using picasso library
                         String fullName = dataSnapshot.child("fullname").getValue().toString();// Set Text
                         navProfileUserName.setText(fullName);
                     }
-
-                    if (dataSnapshot.hasChild("profileImage")){
+                    else if (dataSnapshot.hasChild("profileImage")){
                         // Get the image and udate using picasso library
                         String profilePath = dataSnapshot.child("profileImage").getValue().toString();
                         //Set Image
