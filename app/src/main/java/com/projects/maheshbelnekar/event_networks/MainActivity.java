@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private RecyclerView postList;
     private Toolbar mToolbar;
+    private ImageButton addNewPostButton;
 
     private FirebaseAuth mAuth;
     private DatabaseReference usersRef;
@@ -62,8 +64,12 @@ public class MainActivity extends AppCompatActivity {
 
         navigationView = (NavigationView)findViewById(R.id.navigation_view);
         View navView = navigationView.inflateHeaderView(R.layout.navigation_header);
+        // find view inside navView
         navProfileImage = (CircleImageView) navView.findViewById(R.id.nav_profile_image);
         navProfileUserName = (TextView) navView.findViewById(R.id.nav_user_full_name);
+
+
+        addNewPostButton = (ImageButton) findViewById(R.id.add_new_post);
 
         usersRef.child(currenUserId).addValueEventListener(new ValueEventListener() {
             @Override
@@ -99,6 +105,19 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        addNewPostButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendUserToPostActivity();
+            }
+        });
+    }
+
+    private Boolean sendUserToPostActivity() {
+        Intent addNewPostIntent = new Intent(MainActivity.this, PostActivity.class);
+        startActivity(addNewPostIntent);
+        return true;
     }
 
     @Override
@@ -171,7 +190,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void userMenuSelector(MenuItem item){
+
+        // Defined in /app/res/menu/navigation_menu.xml
         switch (item.getItemId()){
+
+            case R.id.nav_post:
+                Toast.makeText(this,"Post", Toast.LENGTH_SHORT).show();
+                sendUserToPostActivity();
+                break;
 
             case R.id.nav_profile:
                 Toast.makeText(this,"Profile", Toast.LENGTH_SHORT).show();
