@@ -4,10 +4,44 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/darker_gray"
     tools:context=".PostActivity">
 
     <include
         android:id="@+id/update_post_page_toolbar"
-        layout="@layout/app_bar_layout"/>
+        layout="@layout/app_bar_layout" />
+
+    <ImageButton
+        android:id="@+id/imageButton"
+        android:layout_width="268dp"
+        android:layout_height="269dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="65dp"
+        android:layout_marginBottom="238dp"
+        app:srcCompat="@drawable/select_image" />
+
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginBottom="145dp"
+        android:background="@drawable/inputs"
+        android:ems="10"
+        android:hint="Add Event Description"
+        android:inputType="textMultiLine" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="68dp"
+        android:background="@drawable/button"
+        android:text="Update Post" />
 
 </RelativeLayout>
