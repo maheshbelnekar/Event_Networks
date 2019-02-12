@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -15,6 +16,7 @@ public class PostActivity extends AppCompatActivity {
     private ImageButton selectPostImage;
     private Button updatePostButton;
     private EditText postDescription;
+    final static int GALLERY_PICK = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +31,24 @@ public class PostActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Update Post");
+
+
+        selectPostImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectPostImage();
+            }
+        });
+    }
+
+    private Boolean selectPostImage() {
+
+        //Select a picture from the gallery
+        Intent galleryIntent = new Intent();
+        galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+        galleryIntent.setType("image/*");
+        startActivityForResult(galleryIntent,GALLERY_PICK);
+        return true;
     }
 
 
