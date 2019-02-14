@@ -14,7 +14,7 @@ The above scenario is not just limited to a college or workplace but also in peo
 
 ## Screenshots
 <img src="/screenshots/Home_Nav.png" height = "400" alt="Home Screen"> <img src="/screenshots/Login.png" height = "400" alt="Home Screen">
-<img src="/screenshots/Setup.png" height = "400" alt="Home Screen">
+<img src="/screenshots/Setup.png" height = "400" alt="Home Screen"> <img src="/screenshots/Post_New.png" height = "400" alt="Home Screen">
 
 ## Author
 
