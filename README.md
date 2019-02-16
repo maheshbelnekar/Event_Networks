@@ -11,6 +11,7 @@ The above scenario is not just limited to a college or workplace but also in peo
 - Mininum Android SDK Version - 23
 - Target Android SDK Version - 28
 - [Android Studio](https://developer.android.com/studio/)
+- Firebase Connection - [Guide](https://developer.android.com/studio/write/firebase)
 
 ## Screenshots
 <img src="/screenshots/Home_Nav.png" height = "400" alt="Home Screen"> <img src="/screenshots/Login.png" height = "400" alt="Home Screen">
